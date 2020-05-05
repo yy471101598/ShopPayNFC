@@ -5,6 +5,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -17,12 +18,16 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import com.handmark.pulltorefresh.library.PullToRefreshBase;
-import com.handmark.pulltorefresh.library.PullToRefreshListView;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
+import com.scwang.smartrefresh.layout.SmartRefreshLayout;
+import com.scwang.smartrefresh.layout.api.RefreshLayout;
+import com.scwang.smartrefresh.layout.footer.ClassicsFooter;
+import com.scwang.smartrefresh.layout.header.ClassicsHeader;
+import com.scwang.smartrefresh.layout.listener.OnLoadMoreListener;
+import com.scwang.smartrefresh.layout.listener.OnRefreshListener;
 import com.shoppay.wynfc.adapter.ViplistAdapter;
 import com.shoppay.wynfc.bean.VipList;
 import com.shoppay.wynfc.tools.ActivityStack;
@@ -48,14 +53,14 @@ public class VipListActivity extends Activity implements View.OnClickListener {
     private EditText et_chose;
     private TextView tv_title, tv_vipnum;
     private ImageView img_chose;
-    private ListView listView;
     private ViplistAdapter adapter;
     private Context ac;
     private Dialog dialog;
     private List<VipList> list;
     private int mindex = 1;
-    private PullToRefreshListView mPullRefreshListView;
     private int num = 10;
+    ListView mListview;
+    private SmartRefreshLayout mSartRefresh;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -64,31 +69,28 @@ public class VipListActivity extends Activity implements View.OnClickListener {
         dialog = DialogUtil.loadingDialog(VipListActivity.this, 1);
         ActivityStack.create().addActivity(VipListActivity.this);
         initView();
+        mSartRefresh.setRefreshHeader(new ClassicsHeader(this));
+        mSartRefresh.setRefreshFooter(new ClassicsFooter(this));
         list=new ArrayList<VipList>();
         adapter = new ViplistAdapter(getApplicationContext(), list);
-        mPullRefreshListView.setAdapter(adapter);
-        mPullRefreshListView
-                .setOnRefreshListener(new PullToRefreshBase.OnRefreshListener2<ListView>() {
-                    @Override
-                    public void onPullDownToRefresh(
-                            PullToRefreshBase<ListView> refreshView) {
-                        Log.e("TAG", "onPullDownToRefresh");
-                        // 这里写下拉刷新的任务
-//                        li_nomsg.setVisibility(View.GONE);
-                        obtainViplist(1, 1);
-                    }
+        mListview.setAdapter(adapter);
 
-                    @Override
-                    public void onPullUpToRefresh(
-                            PullToRefreshBase<ListView> refreshView) {
-                        Log.e("TAG", "onPullUpToRefresh");
-                        // 这里写上拉加载更多的任务
-                        mindex = mindex + 1;
+        mSartRefresh.setOnRefreshListener(new OnRefreshListener() {
+            @Override
+            public void onRefresh(@NonNull RefreshLayout refreshLayout) {
+                obtainViplist(1, 1);
+            }
+        });
+        mSartRefresh.setOnLoadMoreListener(new OnLoadMoreListener() {
+            @Override
+            public void onLoadMore(@NonNull RefreshLayout refreshLayout) {
+                // 这里写上拉加载更多的任务
+                mindex = mindex + 1;
 //                        li_nomsg.setVisibility(View.GONE);
-                        obtainViplist(mindex, 2);
-                    }
-                });
-        mPullRefreshListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                obtainViplist(mindex, 2);
+            }
+        });
+        mListview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
                   VipList vipList=(VipList) adapterView.getItemAtPosition(i);
@@ -136,7 +138,8 @@ public class VipListActivity extends Activity implements View.OnClickListener {
                     LogUtils.d("xxVipListS",new String(responseBody,"UTF-8"));
                     JSONObject jso=new JSONObject(new String(responseBody,"UTF-8"));
                     if(jso.getBoolean("success")){
-                            mPullRefreshListView.onRefreshComplete();
+                        mSartRefresh.finishRefresh();
+                        mSartRefresh.finishLoadMore();
                       JSONObject jo= jso.getJSONObject("data");
                         Gson gson = new Gson();
                         Type listType = new TypeToken<List<VipList>>(){}.getType();
@@ -167,27 +170,28 @@ public class VipListActivity extends Activity implements View.OnClickListener {
                                     list.addAll(viplist);
                                     adapter.notifyDataSetChanged();
                                     // 调用该方法结束刷新，否则加载圈会一直在
-                                    mPullRefreshListView
-                                            .onRefreshComplete();
+                                    mSartRefresh.finishRefresh();
+                                    mSartRefresh.finishLoadMore();
                                 } else if (state == 2) {// 加载
                                     list.addAll(viplist);
                                     adapter.notifyDataSetChanged();
                                     // 加载完后调用该方法
-                                    mPullRefreshListView
-                                            .onRefreshComplete();
+                                    mSartRefresh.finishRefresh();
+                                    mSartRefresh.finishLoadMore();
                                 } else {
                                     list.clear();
                                     list.addAll(viplist);
                                     adapter.notifyDataSetChanged();
                                     // 调用该方法结束刷新，否则加载圈会一直在
-                                    mPullRefreshListView
-                                            .onRefreshComplete();
+                                    mSartRefresh.finishRefresh();
+                                    mSartRefresh.finishLoadMore();
                                 }
                             }
                     }else{
                         mindex = mindex - 1;
                         adapter.notifyDataSetChanged();
-                        mPullRefreshListView.onRefreshComplete();
+                        mSartRefresh.finishRefresh();
+                        mSartRefresh.finishLoadMore();
                     }
                 }catch (Exception e){
                 }
@@ -201,7 +205,8 @@ public class VipListActivity extends Activity implements View.OnClickListener {
                 mindex = mindex - 1;
                 Toast.makeText(getApplicationContext(), "服务器异常，请稍后再试",
                         Toast.LENGTH_SHORT).show();
-                mPullRefreshListView.onRefreshComplete();
+                mSartRefresh.finishRefresh();
+                mSartRefresh.finishLoadMore();
             }
         });
     }
@@ -212,9 +217,9 @@ public class VipListActivity extends Activity implements View.OnClickListener {
         et_chose = (EditText) findViewById(R.id.viplist_et_search);
         tv_title = (TextView) findViewById(R.id.tv_title);
         tv_vipnum = (TextView) findViewById(R.id.viplist_tv_num);
-        listView= (ListView) findViewById(R.id.listview);
         img_chose= (ImageView) findViewById(R.id.viplist_img_search);
-         mPullRefreshListView= (PullToRefreshListView) findViewById(R.id.pull_refresh_list);
+        mListview = findViewById(R.id.listview);
+        mSartRefresh= findViewById(R.id.smartRefresh);
         tv_title.setText("会员列表");
 
         rl_left.setOnClickListener(this);

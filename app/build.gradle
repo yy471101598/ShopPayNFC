@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 25
-    buildToolsVersion "25.0.2"
+    compileSdkVersion 27
+    buildToolsVersion "28.0.3"
     defaultConfig {
         applicationId "com.shoppay.wynfc"
         minSdkVersion 19
-        targetSdkVersion 25
+        targetSdkVersion 27
         versionCode 64
         versionName "1.64"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
@@ -34,23 +34,19 @@ android {
 }
 
 dependencies {
-    compile fileTree(include: ['*.jar'], dir: 'libs')
-    androidTestCompile('com.android.support.test.espresso:espresso-core:2.2.2', {
-        exclude group: 'com.android.support', module: 'support-annotations'
-    })
-    compile 'com.android.support:appcompat-v7:25.1.1'
-    testCompile 'junit:junit:4.12'
-    compile 'com.google.code.gson:gson:2.6.2'
-    compile 'com.squareup.retrofit2:retrofit:2.1.0'
-    compile 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
-    compile 'com.squareup.retrofit2:adapter-rxjava:2.0.0-beta4'
-    compile 'com.loopj.android:android-async-http:1.4.9'
-    compile files('libs/core-3.3.0.jar')
-    compile 'com.sunmi:sunmiui:1.1.22'
-    compile 'com.sunmi:PayLib:1.0.23'
-    compile project(':base_library_pullToRefresh')
-    compile 'com.github.markzhai:blockcanary-android:1.5.0'
-    compile(name: 'SunmiPayService', ext: 'aar')
+    implementation fileTree(include: ['*.jar'], dir: 'libs')
+    implementation 'com.android.support:appcompat-v7:27.1.1'
+    implementation 'com.google.code.gson:gson:2.6.2'
+    implementation 'com.squareup.retrofit2:retrofit:2.1.0'
+    implementation 'com.squareup.retrofit2:converter-gson:2.0.0-beta4'
+    implementation 'com.squareup.retrofit2:adapter-rxjava:2.0.0-beta4'
+    implementation 'com.loopj.android:android-async-http:1.4.9'
+    implementation files('libs/core-3.3.0.jar')
+    implementation 'com.sunmi:sunmiui:1.1.22'
+    implementation 'com.sunmi:PayLib:1.0.23'
+    implementation 'com.github.markzhai:blockcanary-android:1.5.0'
+    implementation(name: 'SunmiPayService', ext: 'aar')
+    implementation 'com.scwang.smartrefresh:SmartRefreshLayout:1.1.0-alpha-12'
 }
 repositories {
     flatDir {

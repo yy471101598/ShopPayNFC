@@ -352,7 +352,8 @@ public class LoginActivity extends Activity implements View.OnClickListener{
                         PreferenceHelper.write(ac,"shoppay","RechargeCountPrintNumber",Integer.parseInt(dayin.RechargeCountPrintNumber));
                         PreferenceHelper.write(ac,"shoppay","IsChkPwd",dayin.IsChkPwd);
                         Intent intent=new Intent(ac,HomeActivity.class);
-                        intent.putExtra("AppAuthority",dayin.AppAuthority);
+                        intent.putExtra("AppAuthority","123456789");
+//                        intent.putExtra("AppAuthority",dayin.AppAuthority);
                         startActivity(intent);
                         finish();
                     }else{
